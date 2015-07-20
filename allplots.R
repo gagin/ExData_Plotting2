@@ -56,8 +56,8 @@ if(!file.exists("plot3.png"))
 if(!file.exists("plot4.png"))
 {
   png("plot4.png")
-  coal<-subset(SCC,grepl("Coal",SCC.Level.Three))
-  combustioncoal<-subset(coal,grepl("Combustion",SCC.Level.One))
+  coal<-subset(SCC,grepl("Coal",SCC.Level.Three,ignore.case=TRUE))
+  combustioncoal<-subset(coal,grepl("Combustion",SCC.Level.One,ignore.case=TRUE))
   NEI %>%
     subset(SCC %in% combustioncoal$SCC) %>%
       select(Emissions,year) %>%
@@ -73,7 +73,7 @@ if(!file.exists("plot4.png"))
 if(!file.exists("plot5.png"))
 {
   png("plot5.png")
-  vehicles<-subset(SCC,grepl("Vehicle",SCC.Level.Two))
+  vehicles<-subset(SCC,grepl("Vehicle",SCC.Level.Two,ignore.case=TRUE))
   NEI %>%
     filter(fips=="24510") %>%
       subset(SCC %in% vehicles$SCC) %>%
