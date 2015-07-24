@@ -1,5 +1,3 @@
-## Common code for all plots starts
-
 # Get the data files, if they are not in the current folder yet
 fnei<-"summarySCC_PM25.rds"
 fscc<-"Source_Classification_Code.rds"
@@ -18,15 +16,10 @@ if (!file.exists(fnei) || !file.exists(fscc))
 if(!exists("NEI") || dim(NEI)[1] != 6497651) NEI <- readRDS("summarySCC_PM25.rds")
 if(!exists("SCC") || dim(SCC)[1] != 11717) SCC <- readRDS("Source_Classification_Code.rds")
 library(dplyr)
-
-# We need list of year data points for every kind of plot
-years<-unique(NEI$year)
-
-## Common code for all plots ended
-
-library(ggplot2)
+library(lattice)
 
 png("plot6.png")
+
 vehicles<-subset(SCC,grepl("Vehicle",SCC.Level.Two,ignore.case=TRUE))
 places<-c("06037","24510")
 names(places)<-c("Los Angeles","Baltimore")
@@ -34,15 +27,27 @@ cities<-NEI %>%
   subset(fips %in% places) %>%
   subset(SCC %in% vehicles$SCC) %>%
   select(Emissions,year,fips) %>%
-  rename(counties=fips) %>%
-  group_by(year,counties) %>%
-  summarize(TotalEmissions=sum(Emissions)/100)
-cities$counties<-factor(cities$counties,levels=places,labels=names(places))
-p<-qplot(year,TotalEmissions,data=cities,color=counties,
-         main="PM2.5 emissions from vehicles comparison",
-         ylab="PM2.5 emissions, hundred tons"
+  rename(county=fips) %>%
+  group_by(year,county) %>%
+  summarize(Mass=sum(Emissions)/100)
+cities$county<-factor(cities$county,levels=places,labels=names(places))
+cities$year<-factor(cities$year)
+
+# Just for training purposes, let's use lattice's barchart() for this
+# Although originally I did line charts in ggplot, and they look awkward,
+# but have advantage of showing compared percentage change
+# https://github.com/gagin/ExData_Plotting2/blob/2b30598ac533f28c4dda83ad508836eb845c4877/plot6.png
+
+
+p<-barchart(Mass ~ year| county, data=cities, horizontal = FALSE,
+            ylab="PM2.5 emissions, hundred tons",
+            main="PM2.5 emissions from vehicles comparison",
+            col="steel blue"
 )
-# Again, let's make line thicker for the benefit of us partially colorblind people
-# to make it easier to match lines to the legend
-print(p+geom_line(size=2)+scale_x_continuous(breaks=years,labels=years))
+# other way to go is to have "groups=counties" instead of "|counties"
+# then bars will be side-by-side in one panel, but this way Baltimore
+# dynamics is not as visible, as it's dwarved by LA
+
+
+print(p)
 dev.off()
