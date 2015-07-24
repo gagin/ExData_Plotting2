@@ -18,7 +18,7 @@ if(!exists("SCC") || dim(SCC)[1] != 11717) SCC <- readRDS("Source_Classification
 library(dplyr)
 library(lattice)
 
-#png("plot6.png")
+png("plot6-lattice-relative.png")
 
 vehicles<-subset(SCC,grepl("Vehicle",SCC.Level.Two,ignore.case=TRUE))
 places<-c("06037","24510")
@@ -41,26 +41,18 @@ cities$Relative[cities$county==names(places)[1]]<-
 cities$Relative[cities$county==names(places)[2]]<-
   100*cities$Mass[cities$county==names(places)[2]]/cities$Mass[cities$county==names(places)[2] & cities$year=="1999"]
 
-# Just for training purposes, let's use lattice's barchart() for this
-# Although originally I did line charts in ggplot, and they look awkward,
-# but have advantage of showing compared percentage change
-# https://github.com/gagin/ExData_Plotting2/blob/2b30598ac533f28c4dda83ad508836eb845c4877/plot6.png
-
 library(tidyr)
 flat<-cities %>% gather(Scale,Value,-year,-county)
 
 p<-barchart(Value ~ year|Scale, data=flat, horizontal = FALSE,
-            ylab="PM2.5 emissions, hundred tons",
+            ylab="PM2.5 emissions, hundred tons - NOT APPLICABLE TO SECOND",
             main="PM2.5 emissions from vehicles comparison",
             #col="steel blue",
             groups=county,
             auto.key=TRUE
             # now, how do we make second y axis?
+            # actually, it's stupid to display percentages as barchart
 )
-# other way to go is to have "groups=counties" instead of "|counties"
-# then bars will be side-by-side in one panel, but this way Baltimore
-# dynamics is not as visible, as it's dwarved by LA
-
 
 print(p)
-#dev.off()
+dev.off()
