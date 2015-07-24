@@ -18,7 +18,7 @@ if(!exists("SCC") || dim(SCC)[1] != 11717) SCC <- readRDS("Source_Classification
 library(dplyr)
 library(lattice)
 
-png("plot6.png")
+png("plot6-lattice.png")
 
 vehicles<-subset(SCC,grepl("Vehicle",SCC.Level.Two,ignore.case=TRUE))
 places<-c("06037","24510")
@@ -33,11 +33,10 @@ cities<-NEI %>%
 cities$county<-factor(cities$county,levels=places,labels=names(places))
 cities$year<-factor(cities$year)
 
-# Just for training purposes, let's use lattice's barchart() for this
+# Just   for training purposes, let's use lattice's barchart() for this
 # Although originally I did line charts in ggplot, and they look awkward,
 # but have advantage of showing compared percentage change
 # https://github.com/gagin/ExData_Plotting2/blob/2b30598ac533f28c4dda83ad508836eb845c4877/plot6.png
-
 
 p<-barchart(Mass ~ year| county, data=cities, horizontal = FALSE,
             ylab="PM2.5 emissions, hundred tons",
