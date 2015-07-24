@@ -1,5 +1,3 @@
-## Common code for all plots starts
-
 # Get the data files, if they are not in the current folder yet
 fnei<-"summarySCC_PM25.rds"
 fscc<-"Source_Classification_Code.rds"
@@ -19,26 +17,17 @@ if(!exists("NEI") || dim(NEI)[1] != 6497651) NEI <- readRDS("summarySCC_PM25.rds
 if(!exists("SCC") || dim(SCC)[1] != 11717) SCC <- readRDS("Source_Classification_Code.rds")
 library(dplyr)
 
-# We need list of year data points for every kind of plot
-years<-unique(NEI$year)
-
-## Common code for all plots ended
-
 png("plot1.png")
 data<-NEI %>% 
   select(Emissions,year) %>%
   group_by(year) %>%
   summarize(TotalEmissions=sum(Emissions)/1000000)
 
-# TA on forums said it should be histogram, but I believe this works better
-# Emissions measured every three years, but the nature of the change is continuous
+# This version does bar version of the chart, as TA suggested on the forum
+# Originally I preferred lines, they are at my github, if you like
+# In particular, https://github.com/gagin/ExData_Plotting2/commit/2b30598ac533f28c4dda83ad508836eb845c4877
 
-plot(data,main="Overall PM2.5 emissions in the USA",xaxt="n",type="b",
-     
-     # Let's make y start from zero to show the scale,
-     # and add a bit at top for readability
-     
-     ylab="PM2.5 emissions, million tons",ylim=c(0,1.05*max(data$TotalEmissions))
-)
-axis(1,years)
+barplot(data$TotalEmissions,main="Overall PM2.5 emissions in the USA",
+        names.arg=data$year, col="steel blue",
+        ylab="PM2.5 emissions, million tons")
 dev.off()

@@ -1,5 +1,3 @@
-## Common code for all plots starts
-
 # Get the data files, if they are not in the current folder yet
 fnei<-"summarySCC_PM25.rds"
 fscc<-"Source_Classification_Code.rds"
@@ -19,11 +17,6 @@ if(!exists("NEI") || dim(NEI)[1] != 6497651) NEI <- readRDS("summarySCC_PM25.rds
 if(!exists("SCC") || dim(SCC)[1] != 11717) SCC <- readRDS("Source_Classification_Code.rds")
 library(dplyr)
 
-# We need list of year data points for every kind of plot
-years<-unique(NEI$year)
-
-## Common code for all plots ended
-
 png("plot4.png")
 # Data review has shown that Coal is marked at Level 3 and Combustion at Level 1
 coal<-subset(SCC,grepl("Coal",SCC.Level.Three,ignore.case=TRUE))
@@ -33,9 +26,10 @@ data<-NEI %>%
   select(Emissions,year) %>%
   group_by(year) %>%
   summarize(TotalEmissions=sum(Emissions)/1000)
-plot(data, main="PM2.5 emissions from coal combustion-related sources",xaxt="n",type="b",
-     ylab="PM2.5 emissions, thousand tons",
-     ylim=c(0,1.05*max(data$TotalEmissions))
-)
-axis(1,years)
+barplot(data$TotalEmissions,
+        main="PM2.5 emissions from coal combustion-related sources",
+        names.arg=data$year,
+        ylab="PM2.5 emissions, thousand tons",
+        col="steel blue"
+        )
 dev.off()

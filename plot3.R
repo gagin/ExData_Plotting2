@@ -1,5 +1,3 @@
-## Common code for all plots starts
-
 # Get the data files, if they are not in the current folder yet
 fnei<-"summarySCC_PM25.rds"
 fscc<-"Source_Classification_Code.rds"
@@ -19,10 +17,6 @@ if(!exists("NEI") || dim(NEI)[1] != 6497651) NEI <- readRDS("summarySCC_PM25.rds
 if(!exists("SCC") || dim(SCC)[1] != 11717) SCC <- readRDS("Source_Classification_Code.rds")
 library(dplyr)
 
-# We need list of year data points for every kind of plot
-years<-unique(NEI$year)
-
-## Common code for all plots ended
 
 library(ggplot2)
 png("plot3.png")
@@ -31,20 +25,15 @@ bmore<- NEI %>%
   select(Emissions,type,year) %>%
   group_by(type,year) %>%
   summarize(total=sum(Emissions)/100)
-p<-qplot(year,total,data=bmore,color=type,
-         main="Baltimore PM2.5 emissions by type",
-         ylab="PM2.5 emissions, hundred tons"
-)
-# I use print() to make code useable from a function or if()
-# I made line thicker for us partially colorblind people
-# to make legend match easier
-print(p
-      +geom_line(size=2)
-      +scale_x_continuous(breaks=years,labels=years)
 
-      # Add horizontal line to show starting value of "POINT" to see if it decreased
-      
-      +geom_abline(intercept = bmore$total[bmore$year==1999 & bmore$type=="POINT"],
-                   slope=0, size=1)
-)
+# ggplot considers it continuous and misplaces x scale unless years are factors
+bmore$year<-as.factor(bmore$year)
+
+p<-ggplot(data=bmore, aes(x=year,y=total))
+p<-p+geom_bar(stat='identity',aes(fill=type))
+p<-p+facet_wrap(~type, nrow=2)
+p<-p+ggtitle("Baltimore PM2.5 emissions by type")
+p<-p+ylab("PM2.5 emissions, hundred tons")
+print(p)
+
 dev.off()
