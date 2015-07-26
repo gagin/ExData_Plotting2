@@ -41,6 +41,7 @@
   # Replace fips numbers with actual names
   
   cities$counties<-factor(cities$counties,levels=places,labels=names(places))
+
   
   # In order to compare change, let's calculate change relative to 1999 data
   # for both cities
@@ -50,34 +51,24 @@
   cities$Relative[cities$counties==names(places)[2]]<-
     100*cities$TotalEmissions[cities$counties==names(places)[2]]/cities$TotalEmissions[cities$counties==names(places)[2] & cities$year=="1999"]
   
-  # Absolute plot
-  
-  p<-qplot(year,TotalEmissions,data=cities,color=counties,
-           main="PM2.5 emissions from vehicles comparison",
-           ylab="PM2.5 emissions, hundred tons"
-           )
-  # Again, let's make line thicker for the benefit of us partially colorblind people
-  # to make it easier to match lines to the legend
-  p<-p+geom_line(size=2)+scale_x_continuous(breaks=years,labels=years)+guides(colour=FALSE)
-  
   # Relative plot
-  
   p1<-qplot(year,Relative,data=cities,color=counties,
             ylab="Same emissions expressed as percentage to 1999 level"
-            )         
-  p1<-p1+geom_line(size=2)+scale_x_continuous(breaks=years,labels=years)+ theme(legend.position = "top")
+  )         
+  p1<-p1+geom_line(size=2)+scale_x_continuous(breaks=years,labels=years)+theme(legend.position = "top")
+  
+  # Absolute plot
+  cities$year<-factor(cities$year)
+  p<-ggplot(data=cities,aes(x=year,y=TotalEmissions,fill=counties))
+           p<-p+ggtitle("PM2.5 emissions from vehicles comparison")
+           p<-p+ylab("PM2.5 emissions, hundred tons")
+           p<-p+guides(fill=FALSE)
+           p<-p+geom_bar(position="dodge",stat="identity")
+
   
   # Install package "gridExtra" to make arranging ggplots easier
   
   library(gridExtra)
-  
+  png("plot6.png",width=700)
   grid.arrange(p,p1,ncol=2)
-  
-  # Well, it's a bit awkward to have one chart bear title and other one - legend, and perhaps I could have faceted it,
-  # but to me both lines on one chart look prettier, and the example on placing common legend didn't work in my setup
-  # This one - https://github.com/hadley/ggplot2/wiki/Share-a-legend-between-two-ggplot2-graphs
-  # What I have still works well, I believe.
-  
-  
-  dev.copy(png,"plot6.png",width=700)
   dev.off()
